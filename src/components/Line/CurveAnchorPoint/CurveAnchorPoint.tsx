@@ -27,23 +27,26 @@ const CurveAnchorPoint = ({
   const pointCurveEnd = getPoint(pointEnd)
 
   // on drag start point
-  const onDragStartPoint = (event: KonvaEventObject<DragEvent>) => {
+  const onDragStartPoint = useCallback((event: KonvaEventObject<DragEvent>) => {
     event.cancelBubble = true
 
-    setIsDragging(true)
-    setIsAnchor(true)
-  }
+    setIsDragging(() => {
+      setIsAnchor(true)
+
+      return true
+    })
+  }, [ setIsAnchor, setIsDragging])
 
   // on grad point
-  const onDragMovePoint = (event: KonvaEventObject<DragEvent>) => {
+  const onDragMovePoint = useCallback((event: KonvaEventObject<DragEvent>) => {
     event.cancelBubble = true
 
     const { evt: { clientX, clientY }} = event
     setXY({ x: clientX, y: clientY })
-  }
+  }, [setXY])
 
   // on drag end point
-  const onDragEndPoint = (event: KonvaEventObject<DragEvent>) => {
+  const onDragEndPoint = useCallback((event: KonvaEventObject<DragEvent>) => {
     event.cancelBubble = true
 
     const { evt: { clientX, clientY } } = event
@@ -54,7 +57,7 @@ const CurveAnchorPoint = ({
 
       return false
     })
-  }
+  }, [index, setIsAnchor, setIsDragging, updateCurve])
 
   // create lines guide
   const createLayerLines = useCallback((context: Context, shape: ShapeType) => {

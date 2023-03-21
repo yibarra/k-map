@@ -9,21 +9,21 @@ import CurveAnchorPoint from '../CurveAnchorPoint'
 const Curve = ({
   active,
   curve,
+  currentPoint,
   isDragging,
   index,
   getCell,
   getPoint,
-  newPoint,
   properties,
   setIsDragging,
   updateCurve,
+  setXY,
+  x,
+  y,
 }: any) => {
-  const [x, y] = curve.curve
+  const { curve: [xC, yC], pointInit, pointEnd } = curve
 
   const [isAnchor, setIsAnchor] = useState<boolean>(false)
-  const [xy, setXY] = useState<{ x: number, y: number }>({ x, y })
-
-  const { pointInit, pointEnd } = curve
 
   const pointCurveInit = getPoint(pointInit)
   const pointCurveEnd = getPoint(pointEnd)
@@ -33,18 +33,39 @@ const Curve = ({
     (context: Context, point: number[], curve: number[]) => {
       context.moveTo(point[0], point[1])
 
-      context.quadraticCurveTo(xy.x, xy.y, curve[0], curve[1])
+      if (isDragging && isAnchor) {
+        context.quadraticCurveTo(x, y, curve[0], curve[1])
+      } else {
+        context.quadraticCurveTo(xC, yC, curve[0], curve[1])
+      }
     },
-    [isDragging, isAnchor, xy]
+    [isDragging, isAnchor, xC, yC, x, y]
   )
 
   // draw curves
-  const drawCurves = (context: Context, shape: ShapeType) => {
+  const drawCurves = useCallback((context: Context, shape: ShapeType) => {
     context.beginPath()
 
-    drawItemCurve(context, pointCurveInit, pointCurveEnd)
+    if (isDragging) {
+      if (isAnchor) {
+        drawItemCurve(context, pointCurveInit, pointCurveEnd)
+      }
+
+      if (currentPoint === pointInit) {
+        console.info('POINT INIT', x, y)
+        drawItemCurve(context, [x, y], pointCurveEnd)
+      } else if (currentPoint === pointEnd) {
+        console.info('POINT END')
+        drawItemCurve(context, pointCurveInit, [x, y])
+      } else {
+        drawItemCurve(context, pointCurveInit, pointCurveEnd)
+      }
+    } else {
+      drawItemCurve(context, pointCurveInit, pointCurveEnd)
+    }
+
     context.fillStrokeShape(shape)
-  }
+  }, [currentPoint, drawItemCurve, pointInit, pointEnd, x, y])
 
   // render
   return (
@@ -52,16 +73,16 @@ const Curve = ({
       {active && (
         <CurveAnchorPoint
           {...curve}
-          {...xy}
           isDragging={isDragging && isAnchor}
           index={index}
           getCell={getCell}
-          getPoint={getPoint} 
-          newPoint={newPoint}
+          getPoint={getPoint}
           setIsAnchor={setIsAnchor}
           setIsDragging={setIsDragging}
           setXY={setXY}
           updateCurve={updateCurve}
+          x={isDragging && isAnchor ? x : xC}
+          y={isDragging && isAnchor ? y : yC}
         />
       )}
 

@@ -22,8 +22,8 @@ const LayerPoints = ({
   remove,
   setCurrentPoint,
   setIsDragging,
-  setNewPoint,
   updatePointPosition,
+  setXY,
 }: any) => {
   const point = points[currentPoint]
 
@@ -102,6 +102,7 @@ const LayerPoints = ({
       {!remove && active && <Point
         {...point}
         active={active}
+        callbackMove={setXY}
         callback={updatePointPosition}
         getCell={getCell}
         isDragging={isDragging}

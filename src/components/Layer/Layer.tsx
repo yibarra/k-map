@@ -33,22 +33,20 @@ const Layer: React.FC<LayerProps> = ({
   const [newPoint, setNewPoint] = useState<PointType>({ x: 0, y: 0 })
 
   // update points line
-  const factoryPoints = useCallback((
-    type?: string
-  ): number[][] => {
-    if (!Array.isArray(points)) {
-      return []
-    }
+  const factoryPoints = useCallback((type?: string): number[][] => {
+    if (!points || !Array.isArray(points)) { return [] }
 
-    return Object.values(
-      points.map(
-        (item: PointType, index: number) =>
-          index === currentPoint && type === 'ref'
-            ? [ newPoint.x, newPoint.y ]
-            : [ item.x, item.y ]
-      )
+    const pointsResult: any[] = []
+    pointsPositions.map((val: number) => pointsResult.push(points[val]))
+
+
+    return pointsResult.map(
+      (item: PointType, index: number) =>
+        index === currentPoint && type === 'ref'
+          ? [ newPoint.x, newPoint.y ]
+          : [ item.x, item.y ]
     )
-  }, [points])
+  }, [points, pointsPositions])
 
   // get point
   const getPoint = useCallback((index: number) => {
@@ -98,6 +96,7 @@ const Layer: React.FC<LayerProps> = ({
         <>
           {Array.isArray(curves) && curves.map((curve: any, index: number) => (
             <Curve
+              {...newPoint}
               active={true}
               currentPoint={currentPoint}
               curve={curve}
@@ -107,15 +106,15 @@ const Layer: React.FC<LayerProps> = ({
               getCell={getCell}
               getPoint={getPoint}
               key={index}
-              newPoint={newPoint}
               properties={lineProperties}
               setIsDragging={setIsDragging}
               updateCurve={updateCurve}
+              setXY={setNewPoint}
             />
           ))}
 
           <LayerLine
-            active={active}
+            active={true}
             curves={curves}
             currentPoint={currentPoint}
             convertPoints={convertPoints}
@@ -127,6 +126,7 @@ const Layer: React.FC<LayerProps> = ({
           />
 
           <LayerPoints
+            {...newPoint}
             active={true}
             currentPoint={currentPoint}
             getCell={getCell}
@@ -137,6 +137,7 @@ const Layer: React.FC<LayerProps> = ({
             setCurrentPoint={updateCurrentPoint}
             setIsDragging={setIsDragging}
             updatePointPosition={updatePointPosition}
+            setXY={setNewPoint}
           />
         </>
       }

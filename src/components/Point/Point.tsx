@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Circle, Group } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 
@@ -8,17 +8,19 @@ import ToolTip from '../ToolTip'
 // point
 const Point = ({
   active,
+  callbackMove,
   callback,
   getCell,
+  isAnchor,
   isDragging,
   properties,
+  setIsAnchor,
   setIsDragging,
   x,
   y,
 }: any) => {
   const element = useRef<any>(null)
   const point = getCell(x, y)
-  const [xy, setXY] = useState<{ x: number, y: number }>({ x, y })
 
   // on drag start point
   const onDragStartPoint = (event: KonvaEventObject<DragEvent>) => {
@@ -28,23 +30,26 @@ const Point = ({
   }
 
   // on grad point
-  const onDragMovePoint = (event: KonvaEventObject<DragEvent>) => {
+  const onDragMovePoint = useCallback((event: KonvaEventObject<DragEvent>) => {
     event.cancelBubble = true
 
-    const x = event.evt.clientX
-    const y = event.evt.clientY
+    const { evt: { clientX, clientY } } = event
 
-    setXY({ x, y })
-  }
+    if (typeof callbackMove === 'function') {
+      callbackMove({ x: clientX, y: clientY })
+    }
+  }, [callbackMove])
 
   // on drag end point
   const onDragEndPoint = useCallback((event: KonvaEventObject<DragEvent>) => {
     event.cancelBubble = true
+
+    const { evt: { clientX, clientY } } = event
     
-    const value = getCell(event.evt.clientX, event.evt.clientY)
+    const value = getCell(clientX, clientY)
 
     if (active && value && element.current) {
-      const [posX, posY, , xPoint, yPoint] = value
+      const [posX, posY] = value
 
       element.current.to({
         x: posX,
@@ -54,7 +59,7 @@ const Point = ({
 
       setIsDragging(() => {
         if (typeof callback === 'function') {
-          callback([xPoint, yPoint])
+          callback([clientX, clientY])
         }
 
         return false
@@ -80,7 +85,7 @@ const Point = ({
   return (
     <Group>
       {(active && isDragging) &&
-        <ToolTip x={xy.x} y={xy.y - (50 + properties.radius)} />}
+        <ToolTip x={xPoint} y={yPoint - (50 + properties.radius)} />}
 
       <Circle
         {...properties}

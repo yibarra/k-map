@@ -1,11 +1,14 @@
-import React, { useCallback } from 'react'
+import { Context } from 'konva/lib/Context'
+import { Shape as ShapeType } from 'konva/lib/Shape'
+import { useCallback } from 'react'
+import { Shape } from 'react-konva'
 
 import Line from '../../Line'
-import type { PointTypePosition } from '../../Point/interfaces'
+import type { PointType } from '../../Point/interfaces'
 import type { LayerLineProps } from './interfaces'
 
 // layer line
-const LayerLine: React.FC<LayerLineProps> = ({
+const LayerLine = ({
   active,
   curves,
   currentPoint,
@@ -15,7 +18,7 @@ const LayerLine: React.FC<LayerLineProps> = ({
   properties,
   newPoint,
   ...props
-}) => {
+}: any) => {
   // render
   return (
     <>
@@ -32,20 +35,6 @@ const LayerLine: React.FC<LayerLineProps> = ({
           shadowColor: "#2f5ada"
         }}
       />
-
-      {/*
-      <Line
-        {...props}
-        active={active}
-        isDragging={isDragging}
-        points={pointUpdate(points, 'ref')}
-        properties={{
-          ...properties,
-          opacity: isDragging && active ? 1 : 0,
-          shadowColor: "#2f5ada",
-        }}
-      />
-      */}
     </>
   )
 }
